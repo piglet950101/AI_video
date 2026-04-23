@@ -1,0 +1,279 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================================
+// Auth (NextAuth.js models — kept minimal; we gate by email)
+// ============================================================
+
+model NextAuthAccount {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model NextAuthSession {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ============================================================
+// Core domain
+// ============================================================
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Meta integration — token stored encrypted (AES-256-GCM)
+  metaTokenCipher String? @db.Text
+  metaTokenIv     String?
+  metaTokenTag    String?
+  metaTokenExpiresAt DateTime?
+  metaPageId      String?
+  metaPageName    String?
+  igBusinessId    String?
+  igUsername      String?
+
+  // HeyGen identifiers — avatar + voice ids live in Yasmin's HeyGen account
+  heygenAvatarId String?
+  heygenVoiceId  String?
+
+  // Preferred posting windows (BRT hours, 0-23). JSON array.
+  preferredHoursIG Json? // e.g. [12, 19, 21]
+  preferredHoursFB Json? // e.g. [9, 15, 20]
+
+  accounts      NextAuthAccount[]
+  sessions      NextAuthSession[]
+  scripts       Script[]
+  videos        Video[]
+  posts         Post[]
+  portfolio     PortfolioImage[]
+  clickEvents   ClickEvent[]
+
+  @@map("users")
+}
+
+model Script {
+  id          String     @id @default(cuid())
+  userId      String
+  slot        Int        // 1..10 — ordering of the series
+  format      Format     // FEED or REEL (from Marcelo's original classification)
+  titleHook   String
+  body        String     @db.Text
+  cta         String     @db.Text
+  llmVariants Json?      // { INSTAGRAM_REEL: {…}, INSTAGRAM_FEED: {…}, FACEBOOK: {…} }
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  videos      Video[]
+
+  @@unique([userId, slot])
+  @@index([userId])
+  @@map("scripts")
+}
+
+model Video {
+  id           String       @id @default(cuid())
+  scriptId     String
+  userId       String
+  heygenJobId  String?      @unique
+  status       VideoStatus  @default(PENDING)
+  aspectRatio  AspectRatio  @default(PORTRAIT_9_16)
+  r2Key        String?
+  r2Url        String?
+  thumbnailUrl String?
+  durationSec  Int?
+  errorMessage String?      @db.Text
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  script       Script       @relation(fields: [scriptId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  posts        Post[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("videos")
+}
+
+model Post {
+  id            String       @id @default(cuid())
+  userId        String
+  videoId       String?
+  carouselId    String?      // for portfolio carousels (groups PortfolioImage ids)
+  network       Network
+  mediaType     MediaType
+  caption       String       @db.Text
+  hashtags      String[]
+  scheduledAt   DateTime
+  approvedAt    DateTime?
+  publishedAt   DateTime?
+  externalId    String?      // Meta media/post id after publish
+  ctaLink       String?      // e.g. https://app.url/go/{postId}
+  status        PostStatus   @default(PENDING_APPROVAL)
+  rejectReason  String?      @db.Text
+  publishError  String?      @db.Text
+  retryCount    Int          @default(0)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video         Video?       @relation(fields: [videoId], references: [id], onDelete: SetNull)
+  metrics       PostMetric[]
+  clickEvents   ClickEvent[]
+
+  @@index([userId, status])
+  @@index([scheduledAt])
+  @@index([network])
+  @@map("posts")
+}
+
+model PostMetric {
+  id               String   @id @default(cuid())
+  postId           String
+  capturedAt       DateTime @default(now())
+  impressions      Int      @default(0)
+  reach            Int      @default(0)
+  likes            Int      @default(0)
+  comments         Int      @default(0)
+  shares           Int      @default(0)
+  saves            Int      @default(0)
+  videoViews       Int      @default(0)
+  watchTimeSec     Float?
+  avgRetentionPct  Float?
+  totalInteractions Int     @default(0)
+
+  post             Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId, capturedAt])
+  @@map("post_metrics")
+}
+
+model ABTest {
+  id              String     @id @default(cuid())
+  name            String
+  variantAPostId  String
+  variantBPostId  String
+  winnerPostId    String?
+  concludedAt     DateTime?
+  createdAt       DateTime   @default(now())
+
+  @@map("ab_tests")
+}
+
+model PortfolioImage {
+  id          String   @id @default(cuid())
+  userId      String
+  r2Key       String
+  r2Url       String
+  caption     String?
+  projectName String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, order])
+  @@map("portfolio_images")
+}
+
+model ClickEvent {
+  id         String   @id @default(cuid())
+  postId     String?
+  userId     String
+  userAgent  String?  @db.Text
+  referer    String?
+  ipHash     String?  // SHA-256 of IP (never raw IP — LGPD)
+  createdAt  DateTime @default(now())
+
+  post       Post?    @relation(fields: [postId], references: [id], onDelete: SetNull)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@index([userId, createdAt])
+  @@map("click_events")
+}
+
+// ============================================================
+// Enums
+// ============================================================
+
+enum Format {
+  FEED
+  REEL
+}
+
+enum Network {
+  INSTAGRAM
+  FACEBOOK
+}
+
+enum MediaType {
+  REEL
+  FEED_VIDEO
+  CAROUSEL
+}
+
+enum VideoStatus {
+  PENDING
+  RENDERING
+  READY
+  FAILED
+}
+
+enum PostStatus {
+  DRAFT
+  PENDING_APPROVAL
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+  REJECTED
+}
+
+enum AspectRatio {
+  PORTRAIT_9_16
+  SQUARE_1_1
+  LANDSCAPE_16_9
+}

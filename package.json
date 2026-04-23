@@ -1,0 +1,61 @@
+{
+  "name": "errozero-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-powered video automation for errozero.online — Phase 1 MVP",
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "worker:publish": "tsx src/workers/publish.ts",
+    "worker:metrics": "tsx src/workers/metrics.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@auth/prisma-adapter": "^2.7.4",
+    "@aws-sdk/client-s3": "^3.670.0",
+    "@aws-sdk/s3-request-presigner": "^3.670.0",
+    "@hookform/resolvers": "^3.9.1",
+    "@logtail/node": "^0.5.5",
+    "@prisma/client": "^5.22.0",
+    "@sentry/nextjs": "^8.40.0",
+    "bullmq": "^5.26.0",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "ioredis": "^5.4.1",
+    "lucide-react": "^0.462.0",
+    "next": "14.2.18",
+    "next-auth": "^4.24.11",
+    "nodemailer": "^6.9.16",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.53.2",
+    "recharts": "^2.13.3",
+    "tailwind-merge": "^2.5.4",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.1",
+    "@types/nodemailer": "^6.4.16",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "14.2.18",
+    "postcss": "^8.4.49",
+    "prisma": "^5.22.0",
+    "tailwindcss": "^3.4.15",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=18.17.0"
+  }
+}
