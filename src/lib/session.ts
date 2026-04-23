@@ -9,5 +9,5 @@ export async function requireUser() {
   const session = await getServerSession(authOptions);
   const email = session?.user?.email?.toLowerCase();
   if (!email) redirect("/login");
-  return { email, userId: (session?.user as { id?: string })?.id ?? "" };
+  return { email, userId: session?.user?.id ?? "" };
 }

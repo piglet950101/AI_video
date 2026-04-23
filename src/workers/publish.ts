@@ -7,10 +7,9 @@
  * In production, run on Railway/Render/Fly as a worker service. Vercel serverless
  * can't keep a BullMQ Worker alive — the cron endpoints only ENQUEUE.
  */
-import "dotenv/config";
 import { Worker } from "bullmq";
 import { prisma } from "@/lib/db";
-import { redis, QUEUES } from "@/lib/redis";
+import { getRedis, QUEUES } from "@/lib/redis";
 import { loadUserMetaToken, publishIgReel, publishFbVideo } from "@/lib/meta";
 import { log } from "@/lib/logger";
 
@@ -64,7 +63,7 @@ const worker = new Worker(
     await processPost(postId);
   },
   {
-    connection: redis,
+    connection: getRedis(),
     concurrency: 2, // stay well under Meta's 200/hour/user
   },
 );

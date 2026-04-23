@@ -12,13 +12,13 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:seed": "tsx prisma/seed.ts",
+    "db:seed": "tsx --env-file=.env.local prisma/seed.ts",
     "db:studio": "prisma studio",
-    "worker:publish": "tsx src/workers/publish.ts",
-    "worker:metrics": "tsx src/workers/metrics.ts"
+    "worker:publish": "tsx --env-file=.env.local src/workers/publish.ts",
+    "worker:metrics": "tsx --env-file=.env.local src/workers/metrics.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.32.1",
+    "@anthropic-ai/sdk": "^0.40.1",
     "@auth/prisma-adapter": "^2.7.4",
     "@aws-sdk/client-s3": "^3.670.0",
     "@aws-sdk/s3-request-presigner": "^3.670.0",
@@ -33,7 +33,7 @@
     "lucide-react": "^0.462.0",
     "next": "14.2.18",
     "next-auth": "^4.24.11",
-    "nodemailer": "^6.9.16",
+    "nodemailer": "^7.0.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.2",
@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.9.1",
-    "@types/nodemailer": "^6.4.16",
+    "@types/nodemailer": "^7.0.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "autoprefixer": "^10.4.20",

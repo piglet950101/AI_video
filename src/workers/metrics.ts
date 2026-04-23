@@ -5,7 +5,6 @@
  *
  * Start with:  npm run worker:metrics
  */
-import "dotenv/config";
 import { prisma } from "@/lib/db";
 import { getVideoStatus, downloadVideo } from "@/lib/heygen";
 import { keyForVideo, uploadBuffer } from "@/lib/r2";

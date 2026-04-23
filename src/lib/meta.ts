@@ -18,7 +18,10 @@ interface GraphError {
 
 async function call<T>(
   pathOrUrl: string,
-  init: RequestInit & { token?: string; params?: Record<string, string | number | undefined> } = {},
+  init: RequestInit & {
+    token?: string;
+    params?: Record<string, string | number | boolean | undefined>;
+  } = {},
 ): Promise<T> {
   const params = new URLSearchParams();
   for (const [k, v] of Object.entries(init.params ?? {})) {

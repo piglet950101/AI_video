@@ -2,7 +2,6 @@ import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { generateVariants } from "@/lib/claude";
 import { requireUser } from "@/lib/session";
-import { buildGoLink } from "@/lib/utils";
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const { email } = await requireUser();
@@ -26,7 +25,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   await prisma.script.update({
     where: { id: script.id },
-    data: { llmVariants: variants },
+    // Prisma wants a JsonValue — serialize through JSON.parse(stringify()).
+    data: { llmVariants: JSON.parse(JSON.stringify(variants)) },
   });
 
   return NextResponse.json({ variants });

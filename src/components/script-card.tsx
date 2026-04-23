@@ -88,7 +88,7 @@ export function ScriptCard({ script }: Props) {
         </div>
       ) : (
         <p className="text-sm text-[color:var(--muted)] mt-4">
-          Clique em "Gerar variações" para criar versões por plataforma.
+          Clique em &ldquo;Gerar variações&rdquo; para criar versões por plataforma.
         </p>
       )}
     </div>

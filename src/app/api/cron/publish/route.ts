@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { publishQueue } from "@/lib/redis";
+import { getPublishQueue } from "@/lib/redis";
 import { env } from "@/lib/env";
 import { isValidCronRequest } from "@/lib/utils";
 import { log } from "@/lib/logger";
@@ -26,9 +26,10 @@ export async function GET(req: NextRequest) {
     take: 20, // defensive cap below IG's 25 posts/24h
   });
 
+  const queue = getPublishQueue();
   for (const post of due) {
     await prisma.post.update({ where: { id: post.id }, data: { status: "PUBLISHING" } });
-    await publishQueue.add(
+    await queue.add(
       "publish-post",
       { postId: post.id },
       {

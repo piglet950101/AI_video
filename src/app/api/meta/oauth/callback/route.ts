@@ -36,15 +36,16 @@ export async function GET(req: NextRequest) {
   try {
     const shortUserToken = await exchangeCodeForUserToken(code);
     const longUserToken = await exchangeShortLivedForLongLived(shortUserToken);
+    // Page Access Tokens derived from a long-lived User Access Token are themselves
+    // long-lived and have NO expiration (Meta docs). Do not fb_exchange_token again.
     const page = await resolvePage(longUserToken.token);
 
-    // Upgrade the Page Access Token to long-lived too (chained exchange).
-    const longPageToken = await exchangeShortLivedForLongLived(page.pageAccessToken);
-
+    // Use a far-future date since Page tokens derived this way don't expire.
+    const TEN_YEARS_SEC = 10 * 365 * 24 * 60 * 60;
     await saveUserMetaToken(
       u.id,
-      longPageToken.token,
-      longPageToken.expiresInSec,
+      page.pageAccessToken,
+      TEN_YEARS_SEC,
       page.pageId,
       page.pageName,
       page.igBusinessId,

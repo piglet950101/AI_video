@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import crypto from "node:crypto";
 import { prisma } from "@/lib/db";
 import { downloadVideo, getVideoStatus } from "@/lib/heygen";
-import { keyForVideo, uploadBuffer, publicUrl } from "@/lib/r2";
+import { keyForVideo, uploadBuffer } from "@/lib/r2";
 import { env } from "@/lib/env";
 import { log } from "@/lib/logger";
 
@@ -95,5 +95,3 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Prevent unused variable warning on publicUrl import when body doesn't use it.
-void publicUrl;
