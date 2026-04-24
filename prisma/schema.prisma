@@ -12,7 +12,10 @@ datasource db {
 // Auth (NextAuth.js models — kept minimal; we gate by email)
 // ============================================================
 
-model NextAuthAccount {
+// Model names MUST be `Account` and `Session` so @auth/prisma-adapter's
+// `prisma.account.*` and `prisma.session.*` calls resolve. Table names stay
+// lowercase via @@map.
+model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
@@ -32,7 +35,7 @@ model NextAuthAccount {
   @@map("accounts")
 }
 
-model NextAuthSession {
+model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
@@ -82,8 +85,8 @@ model User {
   preferredHoursIG Json? // e.g. [12, 19, 21]
   preferredHoursFB Json? // e.g. [9, 15, 20]
 
-  accounts      NextAuthAccount[]
-  sessions      NextAuthSession[]
+  accounts      Account[]
+  sessions      Session[]
   scripts       Script[]
   videos        Video[]
   posts         Post[]
