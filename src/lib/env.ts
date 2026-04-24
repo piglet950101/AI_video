@@ -47,12 +47,12 @@ const schema = z.object({
   // Logtail / Better Stack
   LOGTAIL_SOURCE_TOKEN: z.string().optional(),
 
-  // HeyGen
-  HEYGEN_API_KEY: z.string().min(1),
+  // HeyGen — optional at build time; required when actually rendering a video.
+  HEYGEN_API_KEY: z.string().optional().default(""),
   HEYGEN_WEBHOOK_SECRET: z.string().optional(),
 
-  // Anthropic
-  ANTHROPIC_API_KEY: z.string().min(1),
+  // Anthropic — optional at build time; required when generating script variants.
+  ANTHROPIC_API_KEY: z.string().optional().default(""),
 
   // Meta
   META_APP_ID: z.string().optional(),
@@ -66,14 +66,13 @@ type Env = z.infer<typeof schema>;
 function loadEnv(): Env {
   const parsed = schema.safeParse(process.env);
   if (!parsed.success) {
-    console.error(
-      "[env] Invalid environment. Missing or malformed vars:\n",
-      parsed.error.flatten().fieldErrors
+    // Warn, never crash: Next.js build executes route modules during "Collecting page data",
+    // and a throw here aborts the whole deploy. Runtime handlers that genuinely need a
+    // missing var will surface a targeted error when the relevant code path is hit.
+    console.warn(
+      "[env] Some environment variables failed validation (non-fatal):",
+      parsed.error.flatten().fieldErrors,
     );
-    // Don't hard-crash in dev if only Meta/optional vars are missing — they can be filled later
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Invalid environment configuration");
-    }
   }
   return (parsed.success ? parsed.data : (process.env as unknown as Env));
 }

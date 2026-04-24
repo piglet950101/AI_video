@@ -2,7 +2,19 @@ import Anthropic from "@anthropic-ai/sdk";
 import { env } from "./env";
 import { log } from "./logger";
 
-export const anthropic = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
+// Lazy-initialized. Instantiating Anthropic({apiKey:""}) at module load would fail
+// during Next.js build when the env is not yet populated.
+let _anthropic: Anthropic | null = null;
+function anthropicClient(): Anthropic {
+  if (_anthropic) return _anthropic;
+  if (!env.ANTHROPIC_API_KEY) {
+    throw new Error(
+      "ANTHROPIC_API_KEY is not configured. Add it in Vercel → Project Settings → Environment Variables.",
+    );
+  }
+  _anthropic = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
+  return _anthropic;
+}
 
 const MODEL = "claude-sonnet-4-6";
 
@@ -67,7 +79,7 @@ export async function generateVariants(args: GenerateArgs): Promise<VariantPack>
   ].join("\n");
 
   try {
-    const response = await anthropic.messages.create({
+    const response = await anthropicClient().messages.create({
       model: MODEL,
       max_tokens: 2048,
       system: [
