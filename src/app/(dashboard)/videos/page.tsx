@@ -1,6 +1,10 @@
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 
+// Always re-render on each request — videos list is mutable from background workers.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function VideosPage() {
   const { email } = await requireUser();
   const user = await prisma.user.findUnique({ where: { email } });

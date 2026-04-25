@@ -3,6 +3,9 @@ import { requireUser } from "@/lib/session";
 import { formatBRT } from "@/lib/utils";
 import { ApprovalCard } from "@/components/approval-card";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function ApprovalsPage() {
   const { email } = await requireUser();
   const user = await prisma.user.findUnique({ where: { email } });

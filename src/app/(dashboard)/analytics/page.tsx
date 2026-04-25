@@ -2,6 +2,9 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { AnalyticsPanels } from "@/components/analytics-panels";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function AnalyticsPage() {
   const { email } = await requireUser();
   const user = await prisma.user.findUnique({ where: { email } });

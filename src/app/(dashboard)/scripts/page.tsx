@@ -2,6 +2,9 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { ScriptCard } from "@/components/script-card";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function ScriptsPage() {
   const { email } = await requireUser();
   const user = await prisma.user.findUnique({ where: { email } });
