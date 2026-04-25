@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
+import { AutoRefresh } from "@/components/auto-refresh";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -26,6 +27,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      <AutoRefresh enabled={true} intervalMs={15000} />
       <h1 className="text-2xl font-semibold">Visão Geral</h1>
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <Stat label="Roteiros" value={scriptsCount} />

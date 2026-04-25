@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { formatBRT } from "@/lib/utils";
 import { ApprovalCard } from "@/components/approval-card";
+import { AutoRefresh } from "@/components/auto-refresh";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -19,6 +20,7 @@ export default async function ApprovalsPage() {
 
   return (
     <div className="space-y-6">
+      <AutoRefresh enabled={true} intervalMs={10000} />
       <h1 className="text-2xl font-semibold">Aguardam aprovação ({posts.length})</h1>
       {posts.length === 0 ? (
         <div className="panel p-6 text-sm text-[color:var(--muted)]">

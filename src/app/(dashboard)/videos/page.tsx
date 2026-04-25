@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
+import { AutoRefresh } from "@/components/auto-refresh";
 
 // Always re-render on each request — videos list is mutable from background workers.
 export const dynamic = "force-dynamic";
@@ -16,9 +17,19 @@ export default async function VideosPage() {
     include: { script: true },
   });
 
+  const hasRendering = videos.some((v) => v.status === "RENDERING" || v.status === "PENDING");
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Vídeos ({videos.length})</h1>
+      <AutoRefresh enabled={hasRendering} intervalMs={5000} />
+      <h1 className="text-2xl font-semibold">
+        Vídeos ({videos.length})
+        {hasRendering && (
+          <span className="ml-3 text-xs font-normal text-[color:var(--muted)] align-middle">
+            atualizando automaticamente…
+          </span>
+        )}
+      </h1>
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
         {videos.map((v) => (
           <div key={v.id} className="panel p-4">
