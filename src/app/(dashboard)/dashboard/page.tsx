@@ -27,8 +27,10 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <AutoRefresh enabled={true} intervalMs={15000} />
-      <h1 className="text-2xl font-semibold">Visão Geral</h1>
+      <h1 className="text-2xl font-semibold flex items-baseline gap-3">
+        Visão Geral
+        <AutoRefresh active={pending > 0} />
+      </h1>
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <Stat label="Roteiros" value={scriptsCount} />
         <Stat label="Vídeos prontos" value={videosReady} />

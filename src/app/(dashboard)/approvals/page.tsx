@@ -20,8 +20,10 @@ export default async function ApprovalsPage() {
 
   return (
     <div className="space-y-6">
-      <AutoRefresh enabled={true} intervalMs={10000} />
-      <h1 className="text-2xl font-semibold">Aguardam aprovação ({posts.length})</h1>
+      <h1 className="text-2xl font-semibold flex items-baseline gap-3">
+        Aguardam aprovação ({posts.length})
+        <AutoRefresh active={posts.length > 0} />
+      </h1>
       {posts.length === 0 ? (
         <div className="panel p-6 text-sm text-[color:var(--muted)]">
           Nenhum post aguardando aprovação. Renderize um vídeo e crie um post primeiro.

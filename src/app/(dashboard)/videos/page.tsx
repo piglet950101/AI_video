@@ -21,14 +21,9 @@ export default async function VideosPage() {
 
   return (
     <div className="space-y-6">
-      <AutoRefresh enabled={hasRendering} intervalMs={5000} />
-      <h1 className="text-2xl font-semibold">
+      <h1 className="text-2xl font-semibold flex items-baseline gap-3">
         Vídeos ({videos.length})
-        {hasRendering && (
-          <span className="ml-3 text-xs font-normal text-[color:var(--muted)] align-middle">
-            atualizando automaticamente…
-          </span>
-        )}
+        <AutoRefresh active={hasRendering} />
       </h1>
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
         {videos.map((v) => (
